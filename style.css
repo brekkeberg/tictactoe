@@ -1,5 +1,10 @@
+*{
+    font-family: "roboto";
+    font-weight: 100;
+}
+
 body{
-    background: lightblue;
+    background: rgb(169, 205, 220);
     display:flex;
     flex-direction: column;
     justify-content: center;
@@ -7,28 +12,77 @@ body{
     height: 100vh;
 }
 .boardContainer{
-    margin: auto;
-    width: 40vmin;
-    height: 40vmin;
-    border: 2px solid black;
+    width: 50vmin;
+    height: 50vmin;
     display: flex;
     flex-direction: column;
 }
 
-.row{
+.boardContainer div{
     flex: 1;
-    border: 3px solid blue;
     display: flex;
     flex-direction: row;
 }
-.square{
+.boardContainer div div{
     flex: 1;
+    align-items: center;
+    justify-content: center;
+    font-size: 11vmin;
+    padding: 0px;
 }
 
-button{
-    width: 2vmin;
-    height: 2vmin;
-    font-size: 10px;
-    padding: 0px;
+#cell0-0{
+    border-bottom: .3vmin solid black;
+    border-top: 0px solid black;
+    border-right: .3vmin solid black;
+    border-left: 0px solid black;
+}
+#cell0-1{
+    border-bottom: .3vmin solid black;
+    border-top: 0px solid black;
+    border-right: 0px solid black;
+    border-left: 0px solid black;
+}
+#cell0-2{
+    border-bottom: .3vmin solid black;
+    border-top: 0px solid black;
+    border-right: 0px solid black;
+    border-left: .3vmin solid black;
+}
+#cell1-0{
+    border-bottom: 0px solid black;
+    border-top: 0px solid black;
+    border-right: .3vmin solid black;
+    border-left: 0px solid black;
+}
+#cell1-1{
+    border-bottom: 0px solid black;
+    border-top: 0px solid black;
+    border-right: 0px solid black;
+    border-left: 0px solid black;
+}
+#cell1-2{
+    border-bottom: 0px solid black;
+    border-top: 0px solid black;
+    border-right: 0px solid black;
+    border-left: .3vmin solid black;
+}
+#cell2-0{
+    border-bottom: 0px solid black;
+    border-top: .3vmin solid black;
+    border-right: .3vmin solid black;
+    border-left: 0px solid black;
+}
+#cell2-1{
+    border-bottom: 0px solid black;
+    border-top: .3vmin solid black;
+    border-right: 0px solid black;
+    border-left: 0px solid black;
+}
+#cell2-2{
+    border-bottom: 0px solid black;
+    border-top: .3vmin solid black;
+    border-right: 0px solid black;
+    border-left: .3vmin solid black;
 }
 
