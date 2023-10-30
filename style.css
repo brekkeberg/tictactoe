@@ -6,15 +6,23 @@
 body{
     background: rgb(169, 205, 220);
     display:flex;
-    flex-direction: column;
-    justify-content:start;
+    flex-direction: row;
+    justify-content:center;
     align-items: center;
     height: 100vh;
 }
 
+.left{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 3vmin;
+}
+
 .winContainer{
     height: 20vmin;
-    font-size: 6vmin;
+    font-size: 5vmin;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -30,6 +38,7 @@ button{
     padding: 2vmin;
     background-color: rgba(255, 255, 255, 0.212);
     border: none;
+    width: 10vmin;
 }
 button:hover{
     background-color: aquamarine;
@@ -39,6 +48,8 @@ button:hover{
 button:active{
     transform: scale(.95);
 }
+
+
 .boardContainer{
     width: 50vmin;
     height: 50vmin;

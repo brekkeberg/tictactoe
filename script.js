@@ -69,7 +69,12 @@ class GameBoard{
         return validMoves
     }
     checkCatsGame(){
-
+        let catsGame = false
+        const board = this.getBoard();
+        if(!board[0].includes("") && !board[1].includes("") && !board[2].includes("")){
+            catsGame = true
+        }
+        return catsGame
     }
     getLanes(){
         class Lane{
@@ -120,6 +125,15 @@ class AI{
     constructor(){
         this.level = "low";
     }
+    getMove = function(){
+        let move = ""
+        if (this.level === "low"){
+            move = this.getMoveLow();
+        } else {
+            move = this.getMoveMedium();
+        }
+        return move
+    }
     getMoveLow = function(){
         const validMoves = gameboard.getValidMoves()
         const index = Math.floor(Math.random()*validMoves.length)
@@ -168,6 +182,9 @@ const ai = new AI;
 
 let currentPlayer = ""
 let gameInProgress = true;
+const aiBtn = document.querySelector(".aiBtn");
+aiBtn.innerText = ai.level;
+aiBtn.addEventListener("click", toggleAILevel);
 
 function restartGame(){
     gameInProgress = true;
@@ -177,6 +194,33 @@ function restartGame(){
     renderBoard();
 }
 
+function playPlayerTurn(e){
+    if (gameInProgress){
+        const cellID = e.target.id;
+        const width = cellID[4];
+        const height = cellID[6];
+        gameboard.modifyBoard(currentPlayer, width, height);
+        renderBoard();
+        renderWinner();
+        renderCatsGame();
+        toggleCurrentPlayer();
+        playAIturn();
+    }
+} 
+
+function playAIturn(){
+    if (gameInProgress){
+        const aiMove = ai.getMove();
+        const aiwidth = aiMove[0];
+        const aiheight = aiMove[1];
+        gameboard.modifyBoard(currentPlayer, aiwidth, aiheight);
+        renderBoard();
+        renderWinner();
+        renderCatsGame();
+        toggleCurrentPlayer();
+    }
+}
+
 function resetCurrentPlayer(){
     currentPlayer = playerX;
 }
@@ -184,7 +228,6 @@ function resetCurrentPlayer(){
 function toggleCurrentPlayer(){
     (currentPlayer === playerX) ? currentPlayer = playerO : currentPlayer = playerX;
 }
-
 
 function renderBoard(){
     clearBoard()
@@ -210,52 +253,45 @@ function clearWinContainer(){
     document.querySelector(".winContainer").textContent = "";
 }
 
-function playPlayerTurn(e){
-    if (gameInProgress){
-        const cellID = e.target.id;
-        const width = cellID[4];
-        const height = cellID[6];
-        gameboard.modifyBoard(currentPlayer, width, height);
-        renderBoard();
-        renderWinner();
-        toggleCurrentPlayer();
-        playAIturn();
-    }
-} 
-
-function playAIturn(){
-    if (gameInProgress){
-        const aiMove = ai.getMoveMedium();
-        const aiwidth = aiMove[0]
-        const aiheight = aiMove[1]
-        gameboard.modifyBoard(currentPlayer, aiwidth, aiheight);
-        renderBoard();
-        renderWinner();
-        toggleCurrentPlayer();
+function renderWinner(){
+    if (gameboard.checkWin() === true){
+        const winner = currentPlayer.playerName;
+        const winContainer = document.querySelector(".winContainer");
+        const winnerText = document.createElement('p');
+        winContainer.appendChild(winnerText);
+        winnerText.innerText = `${winner} is the winner!`;
+        renderButton();
     }
 }
 
-function renderWinner(){
-    if (gameboard.checkWin() === true){
-        const winner = currentPlayer.playerName
+function renderButton(){
+    const winContainer = document.querySelector(".winContainer");
+    const newGameBtn = document.createElement('button');
+    winContainer.appendChild(newGameBtn);
+    newGameBtn.innerText = `play again`;
+    newGameBtn.addEventListener('click', ()=>{
+        restartGame();
+    })
+    gameInProgress = false;
+}
 
-        const winContainer = document.querySelector(".winContainer")
-
-        const winnerText = document.createElement('p')
-        const newGameBtn = document.createElement('button')
-
-        winContainer.appendChild(winnerText)
-        winContainer.appendChild(newGameBtn)
-
-        winnerText.innerText = `${winner} is the winner!`
-        newGameBtn.innerText = `play again`
-
-        newGameBtn.addEventListener('click', ()=>{
-            restartGame();
-        })
-
-        gameInProgress = false;
+function renderCatsGame(){
+    if (gameboard.checkWin() === false && gameboard.checkCatsGame() === true){
+        const winContainer = document.querySelector(".winContainer");
+        const catsGameText = document.createElement('p');
+        winContainer.appendChild(catsGameText);
+        catsGameText.innerText = `Cat's Game!`;
+        renderButton();
     }
+}
+
+function toggleAILevel(){
+    if (ai.level === "low"){
+        ai.level = "medium"
+    } else {
+        ai.level = "low"
+    }
+    aiBtn.innerText = ai.level;
 }
 
 restartGame();
