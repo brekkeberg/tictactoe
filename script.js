@@ -35,23 +35,15 @@ class GameBoard{
     }
     checkWin = function(){
         let isWinner = false
-        function checkForWin(cell1, cell2, cell3){
-            if (cell1 != "" && cell1 === cell2 && cell2 === cell3 ){
+        function checkForWin(lane){
+            if (lane[0] != "" && lane[0] === lane[1] && lane[1] === lane[2] ){
                 isWinner = true;
             }
         }
-        // horizontals
-        for (let i = 0; i < this.WIDTH; i++){
-            checkForWin (this.gameboard[i][0], this.gameboard[i][1], this.gameboard[i][2])
+        const lanes = this.getLanes();
+        for (let i = 0; i < lanes.length; i++){
+            checkForWin(lanes[i].lane)
         }
-        // verticals
-        for (let i = 0; i < this.HEIGHT; i++){
-            checkForWin (this.gameboard[0][i], this.gameboard[1][i], this.gameboard[2][i])
-        }
-        // diagonals
-        checkForWin (this.gameboard[0][0], this.gameboard[1][1], this.gameboard[2][2])
-        checkForWin (this.gameboard[2][0], this.gameboard[1][1], this.gameboard[0][2])
-
         return isWinner
     }
     logBoard = function(){
@@ -63,7 +55,63 @@ class GameBoard{
        } else {
         return false
        }
-    } 
+    }
+    getValidMoves = function(){
+        const board = this.getBoard();
+        const validMoves = []
+        for (let i = 0; i < this.WIDTH; i++){
+            for (let j = 0; j < this.HEIGHT; j++){
+                if (board[i][j] === ""){
+                    validMoves.push([i,j])
+                }
+            } 
+        }
+        return validMoves
+    }
+    checkCatsGame(){
+
+    }
+    getLanes(){
+        class Lane{
+            constructor(name, lane, cellIDs){
+                this.name = name
+                this.lane = lane
+                this.cellIDs = cellIDs
+                this.rank = 0
+                this.openCells = this.getOpenCells(this.lane, "")
+                this.xCount = this.countTokenFrequency("X", this.lane)
+                this.oCount = this.countTokenFrequency("O", this.lane)
+            }
+            countTokenFrequency = function(ele, arr){
+                let frequency = 0;
+                for(let i = 0; i < arr.length; i++){
+                    if(arr[i] === ele)
+                    frequency++;
+                }
+                return frequency
+            }
+            getOpenCells = function(arr, val){
+                var indexes = [], i;
+                for(i = 0; i < arr.length; i++)
+                    if (arr[i] === val)
+                        indexes.push(i);
+                return indexes;
+            }
+        }
+        const b = this.gameboard
+        const hTop = new Lane("hTop", [b[0][0], b[0][1], b[0][2]] , [[0,0],[0,1],[0,2]])
+        const hMid = new Lane("hMid", [b[1][0], b[1][1], b[1][2]] , [[1,0],[1,1],[1,2]])
+        const hBtm = new Lane("hBtm", [b[2][0], b[2][1], b[2][2]] , [[2,0],[2,1],[2,2]])
+
+        const vLft = new Lane("vLft", [b[0][0], b[1][0], b[2][0]] , [[0,0],[1,0],[2,0]])
+        const vMid = new Lane("vMid", [b[0][1], b[1][1], b[2][1]] , [[0,1],[1,1],[2,1]])
+        const vRgt = new Lane("vRgt", [b[0][2], b[1][2], b[2][2]] , [[0,2],[1,2],[2,2]])
+
+        const dLft = new Lane("dLft", [b[0][0], b[1][1], b[2][2]] , [[0,0],[1,1],[2,2]])
+        const dRgt = new Lane("dRgt", [b[0][2], b[1][1], b[2][0]] , [[0,2],[1,1],[2,0]])
+
+        return [hTop, hMid, hBtm, vLft, vMid, vRgt, dLft, dRgt]
+    }
 }
 
 const gameboard = new GameBoard;
@@ -72,27 +120,49 @@ class AI{
     constructor(){
         this.level = "low";
     }
-    getMove = function(){
-        if (this.level === "low"){
-            const width = Math.floor(Math.random()*3)
-            const height = Math.floor(Math.random()*3)
-            return [width, height]
-        }
+    getMoveLow = function(){
+        const validMoves = gameboard.getValidMoves()
+        const index = Math.floor(Math.random()*validMoves.length)
+        const move = validMoves[index]
+        return move
     }
-    getValidMove = function(){
-        let move = this.getMove();
-        let width = move[0];
-        let height = move[1];
-        if (gameboard.checkCellIsEmpty(width, height)){
-            console.log("empty")
-        } else {
-            console.log("filled")
+    getMoveMedium = function(){
+        const lane = this.evaluateLanes();
+        const rand = Math.floor(Math.random()*lane.openCells.length);
+        const moveID = lane.openCells[rand];
+        const move = lane.cellIDs[moveID];
+        return move
+    }
+    evaluateLanes = function(){
+        const lanes = gameboard.getLanes();
+        let maxValue = 0;
+        let bestLane = ""
+        // rank lanes based on combinations of tokens that they contain
+        for (let laneObj of lanes) {
+            if (laneObj.oCount === 2 && laneObj.xCount === 0){
+                laneObj.rank = 5 
+            } else if (laneObj.oCount === 0 && laneObj.xCount ===2){
+                laneObj.rank = 4 
+            } else if (laneObj.oCount === 1 && laneObj.xCount === 0){
+                laneObj.rank = 3 
+            } else if (laneObj.oCount === 0 && laneObj.xCount === 1){
+                laneObj.rank = 2
+            } else if (laneObj.oCount === 0 && laneObj.xCount === 0){
+                laneObj.rank = 1 
+            } else if (laneObj.oCount === 1 && laneObj.xCount === 1){
+                laneObj.rank = 0 
+            } 
         }
-        console.log(width, height)
+        // return the top ranked lane
+        for (let laneObj of lanes){
+            if (laneObj.rank > maxValue){
+                maxValue = laneObj.rank;
+                bestLane = laneObj;
+            }
+        }
+        return bestLane
     }
 }
-
-
 
 const ai = new AI;
 
@@ -101,6 +171,7 @@ let gameInProgress = true;
 
 function restartGame(){
     gameInProgress = true;
+    clearWinContainer();
     resetCurrentPlayer();            
     gameboard.resetBoard();
     renderBoard();
@@ -127,7 +198,7 @@ function renderBoard(){
             column.appendChild(cell);
             cell.innerText = board[i][j];
             cell.id = `cell${i}-${j}`;
-            cell.addEventListener('click', playTurn);     
+            cell.addEventListener('click', playPlayerTurn);     
         }
     }
 }
@@ -135,9 +206,12 @@ function renderBoard(){
 function clearBoard(){
     document.querySelector(".boardContainer").textContent = "";
 }
+function clearWinContainer(){
+    document.querySelector(".winContainer").textContent = "";
+}
 
-function playTurn(e){
-    if (gameInProgress === true){
+function playPlayerTurn(e){
+    if (gameInProgress){
         const cellID = e.target.id;
         const width = cellID[4];
         const height = cellID[6];
@@ -145,8 +219,21 @@ function playTurn(e){
         renderBoard();
         renderWinner();
         toggleCurrentPlayer();
+        playAIturn();
     }
-}    
+} 
+
+function playAIturn(){
+    if (gameInProgress){
+        const aiMove = ai.getMoveMedium();
+        const aiwidth = aiMove[0]
+        const aiheight = aiMove[1]
+        gameboard.modifyBoard(currentPlayer, aiwidth, aiheight);
+        renderBoard();
+        renderWinner();
+        toggleCurrentPlayer();
+    }
+}
 
 function renderWinner(){
     if (gameboard.checkWin() === true){
@@ -163,20 +250,12 @@ function renderWinner(){
         winnerText.innerText = `${winner} is the winner!`
         newGameBtn.innerText = `play again`
 
+        newGameBtn.addEventListener('click', ()=>{
+            restartGame();
+        })
+
         gameInProgress = false;
     }
 }
 
 restartGame();
-
-
-
-
-
-
-
-
-
-
-
-

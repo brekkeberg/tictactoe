@@ -1,12 +1,18 @@
-function xWins(first, second, third){
-    if (first === second && second === third){
-        console.log("WINNER")
-        console.log(`${first} === ${second}`)
-    } else {
-        console.log("no winner")
-    }
+
+function getWinningLanes(){
+    const top = ["X","","O"]
+    const mid = ["X","",""]
+    const btm = ["","",""]
+
+    return {top, mid, btm}
 }
 
-arr = ["x", "x", "x"]
+const x = getWinningLanes();
 
-xWins(arr[0], arr[1], arr[2])
+for (const [key, value] of Object.entries(x)) {
+    console.log(key, value);
+    if (value.includes("X")){
+        console.log("INCLUDES X")
+        console.log(key)
+    }
+}
