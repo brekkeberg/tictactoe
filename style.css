@@ -34,13 +34,14 @@ p{
     margin: 1vmin;
     border: 0px;
     font-size: 3vmin;
+    font-weight: 600;
 }
 button{
     border-radius: .5vmin;
     padding: 2vmin;
     background-color: rgba(255, 255, 255, 0.212);
     border: none;
-    width: 10vmin;
+    width: 12vmin;
     font-weight: 600;
 }
 button:hover{
