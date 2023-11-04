@@ -5,6 +5,10 @@ class Player{
     }
 }
 
+const playerX = new Player("Player X", "X")
+const playerO = new Player("Player O", "O")
+
+
 class GameBoard{
     constructor(){
         this.WIDTH = 3
@@ -73,6 +77,32 @@ class GameBoard{
         return catsGame
     }
     getLanes(){
+        class Lane{
+            constructor(name, lane, cellIDs){
+                this.name = name
+                this.lane = lane
+                this.cellIDs = cellIDs
+                this.rank = 0
+                this.openCells = this.getOpenCells(this.lane, "")
+                this.xCount = this.countTokenFrequency("X", this.lane)
+                this.oCount = this.countTokenFrequency("O", this.lane)
+            }
+            countTokenFrequency = function(ele, arr){
+                let frequency = 0;
+                for(let i = 0; i < arr.length; i++){
+                    if(arr[i] === ele)
+                    frequency++;
+                }
+                return frequency
+            }
+            getOpenCells = function(arr, val){
+                var indexes = [], i;
+                for(i = 0; i < arr.length; i++)
+                    if (arr[i] === val)
+                        indexes.push(i);
+                return indexes;
+            }
+        }
         const b = this.gameboard
         const hTop = new Lane("hTop", [b[0][0], b[0][1], b[0][2]] , [[0,0],[0,1],[0,2]])
         const hMid = new Lane("hMid", [b[1][0], b[1][1], b[1][2]] , [[1,0],[1,1],[1,2]])
@@ -89,49 +119,24 @@ class GameBoard{
     }
 }
 
-class Lane{
-    constructor(name, lane, cellIDs){
-        this.name = name
-        this.lane = lane
-        this.cellIDs = cellIDs
-        this.rank = 0
-        this.openCells = this.getOpenCells(this.lane, "")
-        this.xCount = this.countTokenFrequency("X", this.lane)
-        this.oCount = this.countTokenFrequency("O", this.lane)
-    }
-    countTokenFrequency = function(ele, arr){
-        let frequency = 0;
-        for(let i = 0; i < arr.length; i++){
-            if(arr[i] === ele)
-            frequency++;
-        }
-        return frequency
-    }
-    getOpenCells = function(arr, val){
-        var indexes = [], i;
-        for(i = 0; i < arr.length; i++)
-            if (arr[i] === val)
-                indexes.push(i);
-        return indexes;
-    }
-}
+const gameboard = new GameBoard;
 
 class AI{
     constructor(){
-        this.level = "easy";
+        this.level = "low";
     }
     getMove = function(){
         let move = ""
-        if (this.level === "easy"){
-            move = this.getMoveEasy();
-        } else if (this.level === "medium"){
+        if (this.level === "low"){
+            move = this.getMoveLow();
+        } else if (this.level === "medium") {
             move = this.getMoveMedium();
-        } else if (this.level === "hard"){
+        } else {
             move = this.getMoveHard();
         }
         return move
     }
-    getMoveEasy = function(){
+    getMoveLow = function(){
         const validMoves = gameboard.getValidMoves()
         const index = Math.floor(Math.random()*validMoves.length)
         const move = validMoves[index]
@@ -145,7 +150,19 @@ class AI{
         console.log(move)
         return move
     }
-    getMoveHard = function(){}
+    getMoveHard = function(){
+        const move = ""
+        const board = gameboard.getBoard();
+        if(board[0][0] === "X"){
+            move =
+
+        }
+        const lane = this.evaluateLanes();
+        const rand = Math.floor(Math.random()*lane.openCells.length);
+        const moveID = lane.openCells[rand];
+        move = lane.cellIDs[moveID];
+        return move
+    }
     evaluateLanes = function(){
         const lanes = gameboard.getLanes();
         let maxValue = 0;
@@ -177,12 +194,8 @@ class AI{
     }
 }
 
-
-// game loop
-const playerX = new Player("Player X", "X")
-const playerO = new Player("Player O", "O")
-const gameboard = new GameBoard;
 const ai = new AI;
+
 let currentPlayer = ""
 let gameInProgress = true;
 const aiBtn = document.querySelector(".aiBtn");
@@ -207,9 +220,7 @@ function playPlayerTurn(e){
         renderWinner();
         renderCatsGame();
         toggleCurrentPlayer();
-        setTimeout(()=>{
-            playAIturn()
-        },200);
+        playAIturn();
     }
 } 
 
@@ -244,7 +255,6 @@ function renderBoard(){
         for (let j = 0; j < gameboard.HEIGHT; j++){
             const cell = document.createElement('div');
             column.appendChild(cell);
-            cell.classList = 'cell'
             cell.innerText = board[i][j];
             cell.id = `cell${i}-${j}`;
             cell.addEventListener('click', playPlayerTurn);     
@@ -292,15 +302,14 @@ function renderCatsGame(){
 }
 
 function toggleAILevel(){
-    if (ai.level === "easy"){
+    if (ai.level === "low"){
         ai.level = "medium"
-    } else if (ai.level === "medium"){
-        ai.level = "easy"
-    } else if (ai.level === "hard"){
-        ai.level = "easy"
+    } else if (ai.level === "medium") {
+        ai.level = "hard"
+    } else if (ai.level === "hard" ) {
+        ai.level = "low"
     }
     aiBtn.innerText = ai.level;
 }
 
-// starts game for the first time
 restartGame();

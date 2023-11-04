@@ -1,24 +1,51 @@
 *{
     font-family: "roboto";
-    font-weight: 100;
+    font-weight: 600;
+    color: var(--brown);
+    font-size: 3vmin;
+}
+
+:root{
+    --brown: #473d30;
 }
 
 body{
-    background: linear-gradient(117deg, rgba(34,193,195,1) 0%, rgba(143,193,242,1) 100%);
+    background-color: #d9ceb2;
     display:flex;
-    flex-direction: row;
-    justify-content:center;
-    align-items:start;
+    flex-direction: column;
     height: 100vh;
+    padding: 0px;
+    margin: 0px;
+    border: 0px;
+}
+.top{
+    background-color: #d5ded9;
+    width: 100vw;
+    flex: 0 0 20%;
+    box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
+}
+.bottom{
+    flex: 0 0 80%;
+    display: flex;
+    flex-direction: row;
 }
 
 .left{
-    height: 50vmin;
+    flex: 0 0 20%;
+    background-color: #99b2b7;
+    display: flex;
+    flex-direction: column;
+    justify-content: top;
+    align-items: center;
+    padding: 5vmin;
+    box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
+}
+.right{
+    width: 100%;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    padding: 3vmin;
 }
 
 .winContainer{
@@ -33,19 +60,17 @@ p{
     padding: 0px;
     margin: 1vmin;
     border: 0px;
-    font-size: 3vmin;
-    font-weight: 600;
+    font-size: 5vmin;
+    font-weight: 900;
 }
 button{
     border-radius: .5vmin;
     padding: 2vmin;
     background-color: rgba(255, 255, 255, 0.212);
     border: none;
-    width: 12vmin;
-    font-weight: 600;
+    font-weight: bolder;
 }
 button:hover{
-    background-color: aquamarine;
     transform: scale(1.10);
     transition: .2s;
 }
@@ -55,8 +80,8 @@ button:active{
 
 
 .boardContainer{
-    width: 50vmin;
-    height: 50vmin;
+    width: 60vmin;
+    height: 60vmin;
     display: flex;
     flex-direction: column;
 }
@@ -70,62 +95,66 @@ button:active{
     flex: 1;
     align-items: center;
     justify-content: center;
-    font-size: 11vmin;
+    font-size: 14vmin;
     padding: 0px;
 }
 
 #cell0-0{
-    border-bottom: .3vmin solid black;
-    border-top: 0px solid black;
-    border-right: .3vmin solid black;
-    border-left: 0px solid black;
+    border-bottom: 1vmin solid var(--brown);
+    border-top: 0px solid var(--brown);
+    border-right: 1vmin solid var(--brown);
+    border-left: 0px solid var(--brown);
 }
 #cell0-1{
-    border-bottom: .3vmin solid black;
-    border-top: 0px solid black;
-    border-right: 0px solid black;
-    border-left: 0px solid black;
+    border-bottom: 1vmin solid var(--brown);
+    border-top: 0px solid var(--brown);
+    border-right: 0px solid var(--brown);
+    border-left: 0px solid var(--brown);
 }
 #cell0-2{
-    border-bottom: .3vmin solid black;
-    border-top: 0px solid black;
-    border-right: 0px solid black;
-    border-left: .3vmin solid black;
+    border-bottom: 1vmin solid var(--brown);
+    border-top: 0px solid var(--brown);
+    border-right: 0px solid var(--brown);
+    border-left: 1vmin solid var(--brown);
 }
 #cell1-0{
-    border-bottom: 0px solid black;
-    border-top: 0px solid black;
-    border-right: .3vmin solid black;
-    border-left: 0px solid black;
+    border-bottom: 0px solid var(--brown);
+    border-top: 0px solid var(--brown);
+    border-right: 1vmin solid var(--brown);
+    border-left: 0px solid var(--brown);
 }
 #cell1-1{
-    border-bottom: 0px solid black;
-    border-top: 0px solid black;
-    border-right: 0px solid black;
-    border-left: 0px solid black;
+    border-bottom: 0px solid var(--brown);
+    border-top: 0px solid var(--brown);
+    border-right: 0px solid var(--brown);
+    border-left: 0px solid var(--brown);
 }
 #cell1-2{
-    border-bottom: 0px solid black;
-    border-top: 0px solid black;
-    border-right: 0px solid black;
-    border-left: .3vmin solid black;
+    border-bottom: 0px solid var(--brown);
+    border-top: 0px solid var(--brown);
+    border-right: 0px solid var(--brown);
+    border-left: 1vmin solid var(--brown);
 }
 #cell2-0{
-    border-bottom: 0px solid black;
-    border-top: .3vmin solid black;
-    border-right: .3vmin solid black;
-    border-left: 0px solid black;
+    border-bottom: 0px solid var(--brown);
+    border-top: 1vmin solid var(--brown);
+    border-right: 1vmin solid var(--brown);
+    border-left: 0px solid var(--brown);
 }
 #cell2-1{
-    border-bottom: 0px solid black;
-    border-top: .3vmin solid black;
-    border-right: 0px solid black;
-    border-left: 0px solid black;
+    border-bottom: 0px solid var(--brown);
+    border-top: 1vmin solid var(--brown);
+    border-right: 0px solid var(--brown);
+    border-left: 0px solid var(--brown);
 }
 #cell2-2{
-    border-bottom: 0px solid black;
-    border-top: .3vmin solid black;
-    border-right: 0px solid black;
-    border-left: .3vmin solid black;
+    border-bottom: 0px solid var(--brown);
+    border-top: 1vmin solid var(--brown);
+    border-right: 0px solid var(--brown);
+    border-left: 1vmin solid var(--brown);
+}
+.cell:hover{
+    background-color: #99b2b7;
+    cursor: pointer;
 }
 
