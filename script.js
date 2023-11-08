@@ -5,6 +5,9 @@ class Player{
     }
 }
 
+const playerX = new Player("X", "x")
+const playerO = new Player("O", "o")
+
 class GameBoard{
     constructor(){
         this.WIDTH = 3
@@ -30,17 +33,22 @@ class GameBoard{
         }
     }
     checkWin = function(){
-        let isWinner = false
-        function checkForWin(lane){
-            if (lane[0] != "" && lane[0] === lane[1] && lane[1] === lane[2] ){
-                isWinner = true;
+        const lanes = this.getLanes();
+        for (let laneObj of lanes){
+            let isWinner = laneObj.checkLaneForWin(laneObj.lane)
+            if (isWinner === true){
+                return true
             }
         }
+    }
+    getWinner = function(){
         const lanes = this.getLanes();
-        for (let i = 0; i < lanes.length; i++){
-            checkForWin(lanes[i].lane)
+        for (let laneObj of lanes){
+            let isWinner = laneObj.checkLaneForWin(laneObj.lane)
+            if (isWinner === true){
+                return laneObj.lane[0]
+            }
         }
-        return isWinner
     }
     logBoard = function(){
         console.log(this.gameboard)
@@ -65,12 +73,12 @@ class GameBoard{
         return validMoves
     }
     checkCatsGame(){
-        let catsGame = false
         const board = this.getBoard();
         if(!board[0].includes("") && !board[1].includes("") && !board[2].includes("")){
-            catsGame = true
+            return true
+        } else {
+            return false
         }
-        return catsGame
     }
     getLanes(){
         const b = this.gameboard
@@ -88,6 +96,7 @@ class GameBoard{
         return [hTop, hMid, hBtm, vLft, vMid, vRgt, dLft, dRgt]
     }
 }
+const gameboard = new GameBoard;
 
 class Lane{
     constructor(name, lane, cellIDs){
@@ -96,8 +105,8 @@ class Lane{
         this.cellIDs = cellIDs
         this.rank = 0
         this.openCells = this.getOpenCells(this.lane, "")
-        this.xCount = this.countTokenFrequency("X", this.lane)
-        this.oCount = this.countTokenFrequency("O", this.lane)
+        this.xCount = this.countTokenFrequency(playerX.playerToken, this.lane)
+        this.oCount = this.countTokenFrequency(playerO.playerToken, this.lane)
     }
     countTokenFrequency = function(ele, arr){
         let frequency = 0;
@@ -114,6 +123,12 @@ class Lane{
                 indexes.push(i);
         return indexes;
     }
+    checkLaneForWin = function(lane){
+        if (lane[0] != "" && lane[0] === lane[1] && lane[1] === lane[2] ){
+            return true
+        }
+    }
+
 }
 
 class AI{
@@ -142,10 +157,194 @@ class AI{
         const rand = Math.floor(Math.random()*lane.openCells.length);
         const moveID = lane.openCells[rand];
         const move = lane.cellIDs[moveID];
-        console.log(move)
         return move
     }
-    getMoveHard = function(){}
+    getMoveHard = function(){
+        return this.findBestMove(gameboard.getBoard())
+    }
+    evaluate = function(b){
+            // Checking for Rows for X or O victory.
+            for(let row = 0; row < 3; row++) 
+        { 
+            if (b[row][0] == b[row][1] && 
+                b[row][1] == b[row][2]) 
+            { 
+                if (b[row][0] == playerO.playerToken) 
+                    return +10; 
+                    
+                else if (b[row][0] == playerX.playerToken) 
+                    return -10; 
+            } 
+        } 
+    
+        // Checking for Columns for X or O victory. 
+        for(let col = 0; col < 3; col++) 
+        { 
+            if (b[0][col] == b[1][col] && 
+                b[1][col] == b[2][col]) 
+            { 
+                if (b[0][col] == playerO.playerToken) 
+                    return +10; 
+    
+                else if (b[0][col] == playerX.playerToken) 
+                    return -10; 
+            } 
+        } 
+    
+        // Checking for Diagonals for X or O victory. 
+        if (b[0][0] == b[1][1] && b[1][1] == b[2][2]) 
+        { 
+            if (b[0][0] == playerO.playerToken) 
+                return +10; 
+                
+            else if (b[0][0] == playerX.playerToken) 
+                return -10; 
+        } 
+    
+        if (b[0][2] == b[1][1] &&  
+            b[1][1] == b[2][0]) 
+        { 
+            if (b[0][2] == playerO.playerToken) 
+                return +10; 
+                
+            else if (b[0][2] == playerX.playerToken) 
+                return -10; 
+        } 
+    
+        // Else if none of them have 
+        // won then return 0 
+        return 0; 
+    }
+    isMovesLeft = function(board){ 
+        for(let i = 0; i < 3; i++) 
+        for(let j = 0; j < 3; j++) 
+            if (board[i][j] == '') 
+                return true; 
+                  
+        return false; 
+    } 
+    minimax = function(board, depth, isMax){
+        let score = this.evaluate(board); 
+   
+    // If Maximizer has won the game 
+    // return his/her evaluated score 
+    if (score == 10) 
+        return score; 
+   
+    // If Minimizer has won the game 
+    // return his/her evaluated score 
+    if (score == -10) 
+        return score; 
+   
+    // If there are no more moves and 
+    // no winner then it is a tie 
+    if (this.isMovesLeft(board) == false) 
+        return 0; 
+   
+    // If this maximizer's move 
+    if (isMax) 
+    { 
+        let best = -1000; 
+   
+        // Traverse all cells 
+        for(let i = 0; i < 3; i++) 
+        { 
+            for(let j = 0; j < 3; j++) 
+            { 
+                  
+                // Check if cell is empty 
+                if (board[i][j]=='') 
+                { 
+                      
+                    // Make the move 
+                    board[i][j] = playerO.playerToken; 
+   
+                    // Call minimax recursively  
+                    // and choose the maximum value 
+                    best = Math.max(best, this.minimax(board, 
+                                    depth + 1, !isMax)); 
+   
+                    // Undo the move 
+                    board[i][j] = ''; 
+                } 
+            } 
+        } 
+        return best; 
+    } 
+   
+    // If this minimizer's move 
+    else
+    { 
+        let best = 1000; 
+   
+        // Traverse all cells 
+        for(let i = 0; i < 3; i++) 
+        { 
+            for(let j = 0; j < 3; j++) 
+            { 
+                  
+                // Check if cell is empty 
+                if (board[i][j] == '') 
+                { 
+                      
+                    // Make the move 
+                    board[i][j] = playerX.playerToken; 
+   
+                    // Call minimax recursively and  
+                    // choose the minimum value 
+                    best = Math.min(best, this.minimax(board, 
+                                    depth + 1, !isMax)); 
+   
+                    // Undo the move 
+                    board[i][j] = ''; 
+                } 
+            } 
+        } 
+        return best; 
+    } 
+    }
+    findBestMove = function(board){
+        let bestVal = -1000; 
+        let bestMove = []
+   
+    // Traverse all cells, evaluate  
+    // minimax function for all empty  
+    // cells. And return the cell 
+    // with optimal value. 
+    for(let i = 0; i < 3; i++) 
+    { 
+        for(let j = 0; j < 3; j++) 
+        { 
+              
+            // Check if cell is empty 
+            if (board[i][j] == '') 
+            { 
+                  
+                // Make the move 
+                board[i][j] = playerO.playerToken; 
+   
+                // compute evaluation function  
+                // for this move. 
+                let moveVal = this.minimax(board, 0, false); 
+   
+                // Undo the move 
+                board[i][j] = ''; 
+   
+                // If the value of the current move  
+                // is more than the best value, then  
+                // update best 
+                if (moveVal > bestVal) 
+                { 
+                    bestMove[0] = i
+                    bestMove[1] = j
+                    bestVal = moveVal; 
+                } 
+            } 
+        } 
+    } 
+   
+    return bestMove; 
+    }
     evaluateLanes = function(){
         const lanes = gameboard.getLanes();
         let maxValue = 0;
@@ -176,131 +375,127 @@ class AI{
         return bestLane
     }
 }
-
-
-// game loop
-const playerX = new Player("Player X", "X")
-const playerO = new Player("Player O", "O")
-const gameboard = new GameBoard;
 const ai = new AI;
-let currentPlayer = ""
-let gameInProgress = true;
-const aiBtn = document.querySelector(".aiBtn");
-aiBtn.innerText = ai.level;
-aiBtn.addEventListener("click", toggleAILevel);
 
-function restartGame(){
-    gameInProgress = true;
-    clearWinContainer();
-    resetCurrentPlayer();            
-    gameboard.resetBoard();
-    renderBoard();
-}
-
-function playPlayerTurn(e){
-    if (gameInProgress){
-        const cellID = e.target.id;
-        const width = cellID[4];
-        const height = cellID[6];
-        gameboard.modifyBoard(currentPlayer, width, height);
-        renderBoard();
-        renderWinner();
-        renderCatsGame();
-        toggleCurrentPlayer();
-        setTimeout(()=>{
-            playAIturn()
-        },200);
-    }
-} 
-
-function playAIturn(){
-    if (gameInProgress){
-        const aiMove = ai.getMove();
-        const aiwidth = aiMove[0];
-        const aiheight = aiMove[1];
-        gameboard.modifyBoard(currentPlayer, aiwidth, aiheight);
-        renderBoard();
-        renderWinner();
-        renderCatsGame();
-        toggleCurrentPlayer();
-    }
-}
-
-function resetCurrentPlayer(){
-    currentPlayer = playerX;
-}
-
-function toggleCurrentPlayer(){
-    (currentPlayer === playerX) ? currentPlayer = playerO : currentPlayer = playerX;
-}
-
-function renderBoard(){
-    clearBoard()
-    const boardContainer = document.querySelector(".boardContainer")
-    const board = gameboard.getBoard();
-    for (let i = 0; i < gameboard.WIDTH; i++){
-        const column = document.createElement('div');
-        boardContainer.appendChild(column);
-        for (let j = 0; j < gameboard.HEIGHT; j++){
-            const cell = document.createElement('div');
-            column.appendChild(cell);
-            cell.classList = 'cell'
-            cell.innerText = board[i][j];
-            cell.id = `cell${i}-${j}`;
-            cell.addEventListener('click', playPlayerTurn);     
+class ScreenOutput{
+    constructor(){}
+    renderBoard = ()=>{
+        this.clearBoard()
+        const boardContainer = document.querySelector(".boardContainer")
+        const board = gameboard.getBoard();
+        for (let i = 0; i < gameboard.WIDTH; i++){
+            const column = document.createElement('div');
+            boardContainer.appendChild(column);
+            for (let j = 0; j < gameboard.HEIGHT; j++){
+                const cell = document.createElement('div');
+                column.appendChild(cell);
+                cell.classList = 'cell'
+                cell.innerText = board[i][j];
+                cell.id = `cell${i}-${j}`;
+                cell.addEventListener('click', gameLoop.playPlayerTurn);     
+            }
         }
     }
-}
-
-function clearBoard(){
-    document.querySelector(".boardContainer").textContent = "";
-}
-function clearWinContainer(){
-    document.querySelector(".winContainer").textContent = "";
-}
-
-function renderWinner(){
-    if (gameboard.checkWin() === true){
-        const winner = currentPlayer.playerName;
+    clearBoard = ()=>{
+        document.querySelector(".boardContainer").textContent = "";
+    }
+    clearStatusContainer = ()=>{
+        document.querySelector(".winContainer").textContent = "";
+    }
+    renderGameStatus = ()=>{
         const winContainer = document.querySelector(".winContainer");
-        const winnerText = document.createElement('p');
-        winContainer.appendChild(winnerText);
-        winnerText.innerText = `${winner} is the winner!`;
-        renderButton();
+        const outcomeText = document.createElement('p');
+        const currentPlayer = gameLoop.getCurrentPlayer().playerName;
+        winContainer.appendChild(outcomeText);
+        if (gameboard.checkWin() === true){
+            outcomeText.innerText = `${currentPlayer} is the winner!`;
+            this.renderButton();
+        } else if (gameboard.checkCatsGame() === true){
+                outcomeText.innerText = `Cat's Game!`;
+                this.renderButton();
+        } 
     }
-}
-
-function renderButton(){
-    const winContainer = document.querySelector(".winContainer");
-    const newGameBtn = document.createElement('button');
-    winContainer.appendChild(newGameBtn);
-    newGameBtn.innerText = `play again`;
-    newGameBtn.addEventListener('click', ()=>{
-        restartGame();
-    })
-    gameInProgress = false;
-}
-
-function renderCatsGame(){
-    if (gameboard.checkWin() === false && gameboard.checkCatsGame() === true){
+    renderButton = () =>{
         const winContainer = document.querySelector(".winContainer");
-        const catsGameText = document.createElement('p');
-        winContainer.appendChild(catsGameText);
-        catsGameText.innerText = `Cat's Game!`;
-        renderButton();
+        const newGameBtn = document.createElement('button');
+        winContainer.appendChild(newGameBtn);
+        newGameBtn.innerText = `play again`;
+        newGameBtn.addEventListener('click', ()=>{
+            gameLoop.restartGame();
+        })
+        gameInProgress = false;
     }
 }
+const screenOutput = new ScreenOutput;
 
-function toggleAILevel(){
-    if (ai.level === "easy"){
-        ai.level = "medium"
-    } else if (ai.level === "medium"){
-        ai.level = "easy"
-    } else if (ai.level === "hard"){
-        ai.level = "easy"
-    }
+
+
+
+const gameLoop = (function(){
+    let currentPlayer = ""
+    // make AI toggle button
+    const aiBtn = document.querySelector(".aiBtn");
     aiBtn.innerText = ai.level;
-}
+    aiBtn.addEventListener("click", toggleAILevel);
+
+    function getCurrentPlayer(){
+        return currentPlayer
+    }
+    function restartGame(){
+        gameInProgress = true;
+        screenOutput.clearStatusContainer();
+        resetCurrentPlayer();            
+        gameboard.resetBoard();
+        screenOutput.renderBoard();
+    }
+
+    function playPlayerTurn(e){
+        if (gameInProgress){
+            const cellID = e.target.id;
+            const width = cellID[4];
+            const height = cellID[6];
+            gameboard.modifyBoard(currentPlayer, width, height);
+            screenOutput.renderBoard();
+            screenOutput.clearStatusContainer();
+            screenOutput.renderGameStatus();
+            toggleCurrentPlayer();
+            playAIturn();
+        }
+    } 
+
+    function playAIturn(){
+        if (gameInProgress){
+            const move = ai.getMove();
+            gameboard.modifyBoard(currentPlayer, move[0], move[1]);
+            screenOutput.renderBoard();
+            screenOutput.clearStatusContainer();
+            screenOutput.renderGameStatus();
+            toggleCurrentPlayer();
+
+        }
+    }
+
+    function resetCurrentPlayer(){
+        currentPlayer = playerX;
+    }
+
+    function toggleCurrentPlayer(){
+        (currentPlayer === playerX) ? currentPlayer = playerO : currentPlayer = playerX;
+    }
+
+    function toggleAILevel(){
+        if (ai.level === "easy"){
+            ai.level = "medium"
+        } else if (ai.level === "medium"){
+            ai.level = "hard"
+        } else if (ai.level === "hard"){
+            ai.level = "easy"
+        }
+        aiBtn.innerText = ai.level;
+    }
+    return {restartGame, playPlayerTurn, toggleCurrentPlayer, getCurrentPlayer}
+})();
 
 // starts game for the first time
-restartGame();
+let gameInProgress = true;
+gameLoop.restartGame();
