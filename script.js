@@ -32,8 +32,8 @@ class GameBoard{
             alert("invalid move")
         }
     }
-    checkWin = function(){
-        const lanes = this.getLanes();
+    checkWin = function(board){
+        const lanes = this.getLanes(board);
         for (let laneObj of lanes){
             let isWinner = laneObj.checkLaneForWin(laneObj.lane)
             if (isWinner === true){
@@ -41,8 +41,8 @@ class GameBoard{
             }
         }
     }
-    getWinner = function(){
-        const lanes = this.getLanes();
+    getWinner = function(board){
+        const lanes = this.getLanes(board);
         for (let laneObj of lanes){
             let isWinner = laneObj.checkLaneForWin(laneObj.lane)
             if (isWinner === true){
@@ -72,16 +72,15 @@ class GameBoard{
         }
         return validMoves
     }
-    checkCatsGame(){
-        const board = this.getBoard();
+    checkCatsGame(board){
         if(!board[0].includes("") && !board[1].includes("") && !board[2].includes("")){
             return true
         } else {
             return false
         }
     }
-    getLanes(){
-        const b = this.gameboard
+    getLanes(board){
+        const b = board
         const hTop = new Lane("hTop", [b[0][0], b[0][1], b[0][2]] , [[0,0],[0,1],[0,2]])
         const hMid = new Lane("hMid", [b[1][0], b[1][1], b[1][2]] , [[1,0],[1,1],[1,2]])
         const hBtm = new Lane("hBtm", [b[2][0], b[2][1], b[2][2]] , [[2,0],[2,1],[2,2]])
@@ -153,7 +152,7 @@ class AI{
         return move
     }
     getMoveMedium = function(){
-        const lane = this.evaluateLanes();
+        const lane = this.evaluateLanesMediumMove();
         const rand = Math.floor(Math.random()*lane.openCells.length);
         const moveID = lane.openCells[rand];
         const move = lane.cellIDs[moveID];
@@ -162,190 +161,86 @@ class AI{
     getMoveHard = function(){
         return this.findBestMove(gameboard.getBoard())
     }
-    evaluate = function(b){
-            // Checking for Rows for X or O victory.
-            for(let row = 0; row < 3; row++) 
-        { 
-            if (b[row][0] == b[row][1] && 
-                b[row][1] == b[row][2]) 
-            { 
-                if (b[row][0] == playerO.playerToken) 
-                    return +10; 
-                    
-                else if (b[row][0] == playerX.playerToken) 
-                    return -10; 
-            } 
-        } 
-    
-        // Checking for Columns for X or O victory. 
-        for(let col = 0; col < 3; col++) 
-        { 
-            if (b[0][col] == b[1][col] && 
-                b[1][col] == b[2][col]) 
-            { 
-                if (b[0][col] == playerO.playerToken) 
-                    return +10; 
-    
-                else if (b[0][col] == playerX.playerToken) 
-                    return -10; 
-            } 
-        } 
-    
-        // Checking for Diagonals for X or O victory. 
-        if (b[0][0] == b[1][1] && b[1][1] == b[2][2]) 
-        { 
-            if (b[0][0] == playerO.playerToken) 
-                return +10; 
-                
-            else if (b[0][0] == playerX.playerToken) 
-                return -10; 
-        } 
-    
-        if (b[0][2] == b[1][1] &&  
-            b[1][1] == b[2][0]) 
-        { 
-            if (b[0][2] == playerO.playerToken) 
-                return +10; 
-                
-            else if (b[0][2] == playerX.playerToken) 
-                return -10; 
-        } 
-    
-        // Else if none of them have 
-        // won then return 0 
-        return 0; 
+    evaluateLanesMinimax = function(board){
+        // evaluate function used in minimax, to look at all lanes on the board
+        // and check for the winner, returning +10 if winner is AI, and -10 if winner is player
+        if (gameboard.getWinner(board) === playerO.playerToken){
+            return +10;
+        } else if (gameboard.getWinner(board) === playerX.playerToken){
+            return -10;
+        } else {
+            return 0;
+        }
     }
-    isMovesLeft = function(board){ 
-        for(let i = 0; i < 3; i++) 
-        for(let j = 0; j < 3; j++) 
-            if (board[i][j] == '') 
-                return true; 
-                  
-        return false; 
-    } 
     minimax = function(board, depth, isMax){
-        let score = this.evaluate(board); 
-   
-    // If Maximizer has won the game 
-    // return his/her evaluated score 
-    if (score == 10) 
-        return score; 
-   
-    // If Minimizer has won the game 
-    // return his/her evaluated score 
-    if (score == -10) 
-        return score; 
-   
-    // If there are no more moves and 
-    // no winner then it is a tie 
-    if (this.isMovesLeft(board) == false) 
-        return 0; 
-   
-    // If this maximizer's move 
-    if (isMax) 
-    { 
-        let best = -1000; 
-   
-        // Traverse all cells 
-        for(let i = 0; i < 3; i++) 
-        { 
-            for(let j = 0; j < 3; j++) 
-            { 
-                  
-                // Check if cell is empty 
-                if (board[i][j]=='') 
-                { 
-                      
-                    // Make the move 
-                    board[i][j] = playerO.playerToken; 
-   
-                    // Call minimax recursively  
-                    // and choose the maximum value 
-                    best = Math.max(best, this.minimax(board, 
-                                    depth + 1, !isMax)); 
-   
-                    // Undo the move 
-                    board[i][j] = ''; 
+        let score = this.evaluateLanesMinimax(board); 
+
+        // every time minimax function runs recursively,
+        // first check to see if game has been won, or drawn and return score,
+        // otherwise, go one depth deeper to place another move,
+        // and run minimax on new board
+        if (score == 10) 
+            return score; 
+        if (score == -10) 
+            return score; 
+        if (gameboard.checkCatsGame(board) == true) 
+            return 0; 
+
+        if (isMax){ 
+            let best = -Infinity; 
+            for(let i = 0; i < 3; i++) { 
+                for(let j = 0; j < 3; j++) { 
+                    if (board[i][j]==''){ 
+                        board[i][j] = playerO.playerToken; 
+                        best = Math.max(best, this.minimax(board, depth + 1, !isMax)); 
+                        board[i][j] = ''; 
+                    } 
                 } 
             } 
+            return best; 
         } 
-        return best; 
-    } 
-   
-    // If this minimizer's move 
-    else
-    { 
-        let best = 1000; 
-   
-        // Traverse all cells 
-        for(let i = 0; i < 3; i++) 
-        { 
-            for(let j = 0; j < 3; j++) 
-            { 
-                  
-                // Check if cell is empty 
-                if (board[i][j] == '') 
-                { 
-                      
-                    // Make the move 
-                    board[i][j] = playerX.playerToken; 
-   
-                    // Call minimax recursively and  
-                    // choose the minimum value 
-                    best = Math.min(best, this.minimax(board, 
-                                    depth + 1, !isMax)); 
-   
-                    // Undo the move 
-                    board[i][j] = ''; 
+        else{ 
+            let best = Infinity; 
+            for(let i = 0; i < 3; i++){ 
+                for(let j = 0; j < 3; j++) { 
+                    if (board[i][j] == ''){ 
+                        
+                        board[i][j] = playerX.playerToken; 
+    
+                        best = Math.min(best, this.minimax(board, depth + 1, !isMax)); 
+    
+                        board[i][j] = ''; 
+                    } 
                 } 
             } 
+            return best; 
         } 
-        return best; 
-    } 
     }
     findBestMove = function(board){
-        let bestVal = -1000; 
+
+        // tests initial move on all open positions on board,
+        // and then calls minimax function as game is played through
+        // once game reaches end state, will return the game score as +10, -10, or 0
+        let bestVal = -Infinity; 
         let bestMove = []
-   
-    // Traverse all cells, evaluate  
-    // minimax function for all empty  
-    // cells. And return the cell 
-    // with optimal value. 
-    for(let i = 0; i < 3; i++) 
-    { 
-        for(let j = 0; j < 3; j++) 
-        { 
-              
-            // Check if cell is empty 
-            if (board[i][j] == '') 
-            { 
-                  
-                // Make the move 
-                board[i][j] = playerO.playerToken; 
-   
-                // compute evaluation function  
-                // for this move. 
-                let moveVal = this.minimax(board, 0, false); 
-   
-                // Undo the move 
-                board[i][j] = ''; 
-   
-                // If the value of the current move  
-                // is more than the best value, then  
-                // update best 
-                if (moveVal > bestVal) 
-                { 
-                    bestMove[0] = i
-                    bestMove[1] = j
-                    bestVal = moveVal; 
+        for(let i = 0; i < 3; i++){ 
+            for(let j = 0; j < 3; j++){             
+                if (board[i][j] == ''){ 
+                    board[i][j] = playerO.playerToken; 
+                    let moveVal = this.minimax(board, 0, false); 
+                    board[i][j] = ''; 
+                    if (moveVal > bestVal) 
+                    { 
+                        bestMove[0] = i
+                        bestMove[1] = j
+                        bestVal = moveVal; 
+                    } 
                 } 
             } 
         } 
-    } 
-   
-    return bestMove; 
+        return bestMove; 
     }
-    evaluateLanes = function(){
+    evaluateLanesMediumMove = function(){
         const lanes = gameboard.getLanes();
         let maxValue = 0;
         let bestLane = ""
@@ -407,10 +302,10 @@ class ScreenOutput{
         const outcomeText = document.createElement('p');
         const currentPlayer = gameLoop.getCurrentPlayer().playerName;
         winContainer.appendChild(outcomeText);
-        if (gameboard.checkWin() === true){
+        if (gameboard.checkWin(gameboard.getBoard()) === true){
             outcomeText.innerText = `${currentPlayer} is the winner!`;
             this.renderButton();
-        } else if (gameboard.checkCatsGame() === true){
+        } else if (gameboard.checkCatsGame(gameboard.getBoard()) === true){
                 outcomeText.innerText = `Cat's Game!`;
                 this.renderButton();
         } 
